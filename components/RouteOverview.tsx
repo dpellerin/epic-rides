@@ -9,7 +9,7 @@ export function RouteOverview({ ride }: RouteOverviewProps) {
     <section className="route-overview">
       <div className="route-overview__copy">
         <p className="section-kicker">Route</p>
-        <h2>{ride.startLocation} to {ride.endLocation}</h2>
+        <h2>{ride.routeTitle}</h2>
         <p>{ride.routeNotes}</p>
       </div>
       {ride.routeImageUrl ? (

@@ -96,6 +96,12 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
     introText: ride.introText,
     story: ride.story,
   });
+  const [rideRoute, setRideRoute] = useState({
+    routeTitle: ride.routeTitle ?? "",
+    routeNotes: ride.routeNotes ?? "",
+    routeCaption: ride.routeCaption ?? "",
+    routeImageUrl: ride.routeImageUrl ?? "",
+  });
   const [photos, setPhotos] = useState<RidePhoto[]>(
     [...ride.photos].sort((a, b) => a.sortOrder - b.sortOrder),
   );
@@ -493,6 +499,84 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                 </fieldset>
               </aside>
             ) : null}
+          </section>
+        ) : activeTab === "route" ? (
+          <section className="route-editor">
+            <div className="route-editor-panel">
+              <label>
+                Route title
+                <input
+                  type="text"
+                  value={rideRoute.routeTitle}
+                  onChange={(event) =>
+                    setRideRoute((current) => ({
+                      ...current,
+                      routeTitle: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label>
+                Route notes
+                <textarea
+                  value={rideRoute.routeNotes}
+                  onChange={(event) =>
+                    setRideRoute((current) => ({
+                      ...current,
+                      routeNotes: event.target.value,
+                    }))
+                  }
+                  rows={5}
+                />
+              </label>
+
+              <label>
+                Route caption
+                <input
+                  type="text"
+                  value={rideRoute.routeCaption}
+                  onChange={(event) =>
+                    setRideRoute((current) => ({
+                      ...current,
+                      routeCaption: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label>
+                Route image URL
+                <input
+                  type="text"
+                  value={rideRoute.routeImageUrl}
+                  onChange={(event) =>
+                    setRideRoute((current) => ({
+                      ...current,
+                      routeImageUrl: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            </div>
+
+            <aside className="route-editor-preview">
+              <p className="section-kicker">Public route preview</p>
+              <div className="route-preview-copy">
+                <h2>{rideRoute.routeTitle || "Route title"}</h2>
+                <p>{rideRoute.routeNotes || "Route notes"}</p>
+              </div>
+              {rideRoute.routeImageUrl ? (
+                <figure className="route-preview-map">
+                  <img src={rideRoute.routeImageUrl} alt="" />
+                  {rideRoute.routeCaption ? (
+                    <figcaption>{rideRoute.routeCaption}</figcaption>
+                  ) : null}
+                </figure>
+              ) : (
+                <div className="route-preview-empty">Route image</div>
+              )}
+            </aside>
           </section>
         ) : activeTab === "settings" ? (
           <section className="ride-settings-editor">

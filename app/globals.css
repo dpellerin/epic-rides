@@ -751,6 +751,12 @@ button {
   grid-template-columns: minmax(0, 1fr) 430px;
 }
 
+.route-editor {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 430px;
+}
+
 .ride-settings-editor {
   display: grid;
   gap: 18px;
@@ -761,6 +767,8 @@ button {
 .photo-settings,
 .story-editor-panel,
 .story-editor-preview,
+.route-editor-panel,
+.route-editor-preview,
 .ride-settings-panel,
 .ride-settings-preview,
 .admin-placeholder {
@@ -771,6 +779,12 @@ button {
 }
 
 .story-editor-panel {
+  align-self: start;
+  display: grid;
+  gap: 18px;
+}
+
+.route-editor-panel {
   align-self: start;
   display: grid;
   gap: 18px;
@@ -1017,6 +1031,7 @@ button {
 .photo-settings label,
 .photo-settings fieldset,
 .story-editor-panel label,
+.route-editor-panel label,
 .ride-settings-panel label {
   border: 0;
   color: #536058;
@@ -1052,7 +1067,9 @@ button {
 .ride-settings-panel input,
 .ride-settings-panel textarea,
 .story-editor-panel input,
-.story-editor-panel textarea {
+.story-editor-panel textarea,
+.route-editor-panel input,
+.route-editor-panel textarea {
   background: #fff;
   border: 1px solid var(--admin-line);
   color: #18211c;
@@ -1067,7 +1084,8 @@ button {
 }
 
 .ride-settings-panel input,
-.story-editor-panel input {
+.story-editor-panel input,
+.route-editor-panel input {
   min-height: 44px;
 }
 
@@ -1080,6 +1098,10 @@ button {
 }
 
 .story-editor-panel textarea {
+  resize: vertical;
+}
+
+.route-editor-panel textarea {
   resize: vertical;
 }
 
@@ -1135,6 +1157,66 @@ button {
 .story-preview-markdown ul {
   margin: 8px 0 0;
   padding-left: 20px;
+}
+
+.route-editor-preview {
+  align-self: start;
+  display: grid;
+  gap: 16px;
+  position: sticky;
+  top: 18px;
+}
+
+.route-preview-copy {
+  background: #eef1ee;
+  border: 1px solid #d9ded6;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.route-preview-copy h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  line-height: 1;
+  margin: 0;
+}
+
+.route-preview-copy p {
+  color: #536058;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.route-preview-map {
+  background: #fff;
+  border: 1px solid #d9ded6;
+  margin: 0;
+  padding: 10px;
+}
+
+.route-preview-map img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  width: 100%;
+}
+
+.route-preview-map figcaption {
+  color: #657069;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  padding: 10px 2px 0;
+}
+
+.route-preview-empty {
+  align-items: center;
+  background: #eef1ee;
+  border: 1px dashed #aeb8ad;
+  color: #657069;
+  display: grid;
+  font-weight: 800;
+  min-height: 220px;
+  place-items: center;
 }
 
 .ride-settings-preview {
@@ -1225,6 +1307,7 @@ button {
   .route-overview,
   .photo-card--feature,
   .story-editor,
+  .route-editor,
   .photo-editor,
   .ride-settings-editor,
   .admin-app {
@@ -1242,6 +1325,7 @@ button {
 
   .photo-settings,
   .story-editor-preview,
+  .route-editor-preview,
   .ride-settings-preview {
     position: static;
   }

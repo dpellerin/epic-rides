@@ -27,8 +27,6 @@ export type Ride = {
   introText: string;
   story: string;
   region?: string;
-  startLocation?: string;
-  endLocation?: string;
   rideDate?: string;
   distance?: string;
   duration?: string;
@@ -40,6 +38,7 @@ export type Ride = {
   tags: string[];
   coverPhotoId?: string;
   coverImageUrl: string;
+  routeTitle?: string;
   routeImageUrl?: string;
   routeCaption?: string;
   routeNotes?: string;
@@ -103,8 +102,6 @@ The public page should make that rhythm visible. A route image gives visitors co
 - The admin editor can shape the public layout without becoming complicated.
 - Static route images are enough for an early version.`,
     region: "North Cascades",
-    startLocation: "River Road",
-    endLocation: "Valley Overlook",
     rideDate: "Late summer",
     distance: "184 mi",
     duration: "1 long day",
@@ -116,6 +113,7 @@ The public page should make that rhythm visible. A route image gives visitors co
     tags: ["mountains", "forest", "lake", "golden hour"],
     coverPhotoId: "photo-hero",
     coverImageUrl: "/rides/cascade-loop/hero.png",
+    routeTitle: "A mountain loop with forest curves and lakeside pullouts.",
     routeImageUrl: "/rides/cascade-loop/route.png",
     routeCaption: "Static route concept for the Cascade Loop.",
     routeNotes:
