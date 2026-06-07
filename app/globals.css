@@ -812,6 +812,8 @@ button {
 
 .public-preview-strip {
   border: 1px solid var(--admin-line);
+  display: grid;
+  gap: 14px;
   padding: 14px;
 }
 
@@ -827,6 +829,53 @@ button {
   text-transform: uppercase;
 }
 
+.preview-summary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preview-summary div,
+.preview-note {
+  background: #eef1ee;
+  border: 1px solid #d9ded6;
+  padding: 12px;
+}
+
+.preview-summary strong {
+  display: block;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.preview-summary span,
+.preview-note span,
+.preview-block__label small {
+  color: #657069;
+  font-size: 0.82rem;
+}
+
+.preview-block {
+  display: grid;
+  gap: 8px;
+}
+
+.preview-block__label {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.preview-block__label span,
+.preview-note strong {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .preview-strip__layout {
   display: grid;
   gap: 8px;
@@ -834,7 +883,11 @@ button {
 }
 
 .preview-photo {
+  background: #fff;
+  border: 2px solid transparent;
   grid-column: span 2;
+  padding: 0;
+  position: relative;
 }
 
 .preview-photo--hero,
@@ -850,6 +903,67 @@ button {
   aspect-ratio: 16 / 9;
   object-fit: cover;
   width: 100%;
+}
+
+.preview-photo span {
+  background: rgba(23, 32, 27, 0.78);
+  bottom: 7px;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  left: 7px;
+  letter-spacing: 0.08em;
+  padding: 5px 7px;
+  position: absolute;
+  text-transform: uppercase;
+}
+
+.preview-album {
+  display: grid;
+  gap: 4px;
+  grid-auto-flow: dense;
+  grid-auto-rows: 8px;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.preview-album__tile {
+  background: #fff;
+  border: 2px solid transparent;
+  grid-column: span 2;
+  grid-row: span 12;
+  padding: 0;
+}
+
+.preview-album__tile--pattern-1,
+.preview-album__tile--pattern-4,
+.preview-album__tile--pattern-7 {
+  grid-column: 1 / -1;
+  grid-row: span 15;
+}
+
+.preview-album__tile--pattern-2,
+.preview-album__tile--pattern-3,
+.preview-album__tile--pattern-5,
+.preview-album__tile--pattern-6,
+.preview-album__tile--pattern-8,
+.preview-album__tile--pattern-9 {
+  grid-column: span 4;
+}
+
+.preview-album__tile img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.preview-photo.is-selected,
+.preview-album__tile.is-selected {
+  border-color: var(--clay);
+}
+
+.preview-note {
+  display: grid;
+  gap: 4px;
 }
 
 .photo-settings {

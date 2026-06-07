@@ -37,6 +37,20 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
     () => photos.find((photo) => photo.id === selectedPhotoId) ?? photos[0],
     [photos, selectedPhotoId],
   );
+  const storyPhotos = useMemo(
+    () =>
+      photos.filter(
+        (photo) => photo.caption || photo.storyText || photo.textPlacement !== "none",
+      ),
+    [photos],
+  );
+  const albumPhotos = useMemo(
+    () =>
+      photos.filter(
+        (photo) => !photo.caption && !photo.storyText && photo.textPlacement === "none",
+      ),
+    [photos],
+  );
 
   function updateSelectedPhoto(updates: Partial<RidePhoto>) {
     if (!selectedPhoto) {
@@ -146,12 +160,70 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                   <PanelRight size={18} />
                   Public layout preview
                 </div>
-                <div className="preview-strip__layout">
-                  {photos.map((photo) => (
-                    <div className={`preview-photo preview-photo--${photo.displaySize}`} key={photo.id}>
-                      <img src={photo.imageUrl} alt="" />
+
+                <div className="preview-summary">
+                  <div>
+                    <strong>{storyPhotos.length}</strong>
+                    <span>Story photos</span>
+                  </div>
+                  <div>
+                    <strong>{albumPhotos.length}</strong>
+                    <span>Album photos</span>
+                  </div>
+                </div>
+
+                <div className="preview-block">
+                  <div className="preview-block__label">
+                    <span>Story sequence</span>
+                    <small>Captioned or noted photos</small>
+                  </div>
+                  <div className="preview-strip__layout">
+                    {storyPhotos.map((photo) => (
+                      <button
+                        type="button"
+                        className={`preview-photo preview-photo--${photo.displaySize} ${
+                          photo.id === selectedPhoto?.id ? "is-selected" : ""
+                        }`}
+                        key={photo.id}
+                        onClick={() => setSelectedPhotoId(photo.id)}
+                      >
+                        <img src={photo.imageUrl} alt="" />
+                        <span>{photo.displaySize}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {albumPhotos.length > 0 ? (
+                  <div className="preview-block">
+                    <div className="preview-block__label">
+                      <span>Album mosaic</span>
+                      <small>Image-only photos</small>
                     </div>
-                  ))}
+                    <div className="preview-album">
+                      {albumPhotos.map((photo, index) => (
+                        <button
+                          type="button"
+                          className={`preview-album__tile preview-album__tile--pattern-${
+                            (index % 10) + 1
+                          } ${photo.id === selectedPhoto?.id ? "is-selected" : ""}`}
+                          key={photo.id}
+                          onClick={() => setSelectedPhotoId(photo.id)}
+                        >
+                          <img src={photo.imageUrl} alt="" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="preview-note">
+                  <strong>{selectedPhoto?.textPlacement === "none" ? "Album" : "Story"}</strong>
+                  <span>
+                    {selectedPhoto?.textPlacement === "none"
+                      ? "This selected photo is image-only and appears in the mosaic."
+                      : "This selected photo appears in the story sequence."}
+                  </span>
                 </div>
               </div>
             </div>
