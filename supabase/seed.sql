@@ -91,6 +91,126 @@ insert into public.ride_photos (
   'story-block',
   3,
   false
+),
+(
+  '00000000-0000-4000-8000-000000000104',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/hero.png',
+  null,
+  null,
+  'Wide mountain road pullout during a motorcycle ride.',
+  'wide',
+  'none',
+  4,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000105',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/lake-stop.png',
+  null,
+  null,
+  'Motorcycle stopped near a mountain lake.',
+  'standard',
+  'none',
+  5,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000106',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/forest-road.png',
+  null,
+  null,
+  'Forest road curve seen from the rider perspective.',
+  'feature',
+  'none',
+  6,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000107',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/lake-stop.png',
+  null,
+  null,
+  'Loaded motorcycle parked at a scenic stop.',
+  'standard',
+  'none',
+  7,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000108',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/hero.png',
+  null,
+  null,
+  'Open road and mountain overlook on the Cascade Loop.',
+  'hero',
+  'none',
+  8,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000109',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/forest-road.png',
+  null,
+  null,
+  'Sunlit pavement winding through trees.',
+  'standard',
+  'none',
+  9,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000110',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/lake-stop.png',
+  null,
+  null,
+  'Quiet lakeside break during a long ride.',
+  'wide',
+  'none',
+  10,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000111',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/hero.png',
+  null,
+  null,
+  'Motorcycle at a high overlook with a road beyond it.',
+  'standard',
+  'none',
+  11,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000112',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/forest-road.png',
+  null,
+  null,
+  'Tree-lined road section with filtered sunlight.',
+  'feature',
+  'none',
+  12,
+  false
+),
+(
+  '00000000-0000-4000-8000-000000000113',
+  '00000000-0000-4000-8000-000000000001',
+  '/rides/cascade-loop/lake-stop.png',
+  null,
+  null,
+  'Motorcycle luggage and lake view during a route stop.',
+  'standard',
+  'none',
+  13,
+  false
 );
 
 update public.rides

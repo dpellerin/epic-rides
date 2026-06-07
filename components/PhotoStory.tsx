@@ -13,8 +13,30 @@ export function PhotoStory({ photos }: PhotoStoryProps) {
     () => [...photos].sort((a, b) => a.sortOrder - b.sortOrder),
     [photos],
   );
+  const storyPhotos = useMemo(
+    () =>
+      sortedPhotos.filter(
+        (photo) => photo.caption || photo.storyText || photo.textPlacement !== "none",
+      ),
+    [sortedPhotos],
+  );
+  const albumPhotos = useMemo(
+    () =>
+      sortedPhotos.filter(
+        (photo) => !photo.caption && !photo.storyText && photo.textPlacement === "none",
+      ),
+    [sortedPhotos],
+  );
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const activePhoto = activeIndex === null ? null : sortedPhotos[activeIndex];
+
+  function openPhoto(photoId: string) {
+    const nextIndex = sortedPhotos.findIndex((photo) => photo.id === photoId);
+
+    if (nextIndex >= 0) {
+      setActiveIndex(nextIndex);
+    }
+  }
 
   function showPrevious() {
     setActiveIndex((current) => {
@@ -43,34 +65,63 @@ export function PhotoStory({ photos }: PhotoStoryProps) {
         <h2>Images with their own piece of the ride.</h2>
       </div>
 
-      <div className="photo-story__grid">
-        {sortedPhotos.map((photo, index) => (
-          <article
-            className={`photo-card photo-card--${photo.displaySize} photo-card--text-${photo.textPlacement}`}
-            key={photo.id}
-          >
-            <button
-              type="button"
-              className="photo-card__image"
-              onClick={() => setActiveIndex(index)}
-              aria-label={`Open ${photo.caption ?? "ride photo"} full screen`}
+      {storyPhotos.length > 0 ? (
+        <div className="photo-story__grid">
+          {storyPhotos.map((photo) => (
+            <article
+              className={`photo-card photo-card--${photo.displaySize} photo-card--text-${photo.textPlacement}`}
+              key={photo.id}
             >
-              <img src={photo.imageUrl} alt={photo.altText ?? ""} />
-              <span>
-                <Maximize2 size={16} />
-                View
-              </span>
-            </button>
+              <button
+                type="button"
+                className="photo-card__image"
+                onClick={() => openPhoto(photo.id)}
+                aria-label={`Open ${photo.caption ?? "ride photo"} full screen`}
+              >
+                <img src={photo.imageUrl} alt={photo.altText ?? ""} />
+                <span>
+                  <Maximize2 size={16} />
+                  View
+                </span>
+              </button>
 
-            {photo.textPlacement !== "none" ? (
-              <div className="photo-card__text">
-                {photo.caption ? <h3>{photo.caption}</h3> : null}
-                {photo.storyText ? <p>{photo.storyText}</p> : null}
-              </div>
-            ) : null}
-          </article>
-        ))}
-      </div>
+              {photo.textPlacement !== "none" ? (
+                <div className="photo-card__text">
+                  {photo.caption ? <h3>{photo.caption}</h3> : null}
+                  {photo.storyText ? <p>{photo.storyText}</p> : null}
+                </div>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      {albumPhotos.length > 0 ? (
+        <div className="photo-album" aria-label="Ride album">
+          {albumPhotos.map((photo, index) => (
+            <article
+              className={`photo-album__tile photo-album__tile--${photo.displaySize} photo-album__tile--pattern-${
+                (index % 10) + 1
+              }`}
+              key={photo.id}
+            >
+              <button
+                type="button"
+                onClick={() => openPhoto(photo.id)}
+                aria-label={`Open ride photo ${
+                  sortedPhotos.findIndex((item) => item.id === photo.id) + 1
+                } full screen`}
+              >
+                <img src={photo.imageUrl} alt={photo.altText ?? ""} />
+                <span>
+                  <Maximize2 size={16} />
+                  View
+                </span>
+              </button>
+            </article>
+          ))}
+        </div>
+      ) : null}
 
       {activePhoto ? (
         <div className="lightbox" role="dialog" aria-modal="true">
