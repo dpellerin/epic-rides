@@ -1,11 +1,20 @@
 import Link from "next/link";
-import type { Ride } from "@/lib/rides";
+import {
+  getRideDateLabel,
+  getRideDaysLabel,
+  getRideMilesLabel,
+  type Ride,
+} from "@/lib/rides";
 
 type RideHeroProps = {
   ride: Ride;
 };
 
 export function RideHero({ ride }: RideHeroProps) {
+  const dateLabel = getRideDateLabel(ride);
+  const milesLabel = getRideMilesLabel(ride);
+  const daysLabel = getRideDaysLabel(ride);
+
   return (
     <section className="ride-hero">
       <img src={ride.coverImageUrl} alt="" />
@@ -24,9 +33,9 @@ export function RideHero({ ride }: RideHeroProps) {
         <h1>{ride.title}</h1>
         <p>{ride.summary}</p>
         <div className="ride-hero__meta">
-          <span>{ride.rideDate}</span>
-          <span>{ride.distance}</span>
-          <span>{ride.duration}</span>
+          <span>{dateLabel}</span>
+          <span>{milesLabel}</span>
+          <span>{daysLabel}</span>
         </div>
       </div>
     </section>

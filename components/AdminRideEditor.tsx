@@ -19,6 +19,7 @@ import type {
   Ride,
   RidePhoto,
 } from "@/lib/rides";
+import { getRideDateLabel, getRideDaysLabel, getRideMilesLabel } from "@/lib/rides";
 
 type AdminRideEditorProps = {
   ride: Ride;
@@ -27,8 +28,66 @@ type AdminRideEditorProps = {
 const displaySizes: PhotoDisplaySize[] = ["standard", "wide", "hero", "feature"];
 const textPlacements: PhotoTextPlacement[] = ["caption", "side-note", "story-block", "none"];
 
+function parseDateInput(dateValue: string) {
+  if (!dateValue) {
+    return null;
+  }
+
+  const [year, month, day] = dateValue.split("-").map(Number);
+
+  return new Date(year, month - 1, day);
+}
+
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getPositiveDayCount(daysValue: string) {
+  const dayCount = Number.parseInt(daysValue, 10);
+
+  return Number.isFinite(dayCount) && dayCount >= 1 ? dayCount : null;
+}
+
+function getEndDateFromStartAndDays(startDate: string, dayCount: number) {
+  const date = parseDateInput(startDate);
+
+  if (!date) {
+    return "";
+  }
+
+  date.setDate(date.getDate() + dayCount - 1);
+
+  return formatDateInput(date);
+}
+
+function getInclusiveDayCount(startDate: string, endDate: string) {
+  const start = parseDateInput(startDate);
+  const end = parseDateInput(endDate);
+
+  if (!start || !end) {
+    return "";
+  }
+
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  const dayCount = Math.round((end.getTime() - start.getTime()) / millisecondsPerDay) + 1;
+
+  return `${Math.max(1, dayCount)}`;
+}
+
 export function AdminRideEditor({ ride }: AdminRideEditorProps) {
   const [activeTab, setActiveTab] = useState("photos");
+  const [rideSettings, setRideSettings] = useState({
+    title: ride.title,
+    description: ride.summary,
+    miles: ride.miles?.toString() ?? "",
+    days: ride.days?.toString() ?? "",
+    startDate: ride.startDate ?? "",
+    endDate: ride.endDate ?? "",
+  });
   const [photos, setPhotos] = useState<RidePhoto[]>(
     [...ride.photos].sort((a, b) => a.sortOrder - b.sortOrder),
   );
@@ -51,6 +110,18 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
       ),
     [photos],
   );
+  const settingsPreviewRide = {
+    miles: Number(rideSettings.miles) || undefined,
+    distance: undefined,
+    days: Number(rideSettings.days) || undefined,
+    duration: undefined,
+    startDate: rideSettings.startDate,
+    endDate: rideSettings.endDate,
+    rideDate: undefined,
+  };
+  const milesLabel = getRideMilesLabel(settingsPreviewRide);
+  const daysLabel = getRideDaysLabel(settingsPreviewRide);
+  const dateLabel = getRideDateLabel(settingsPreviewRide);
 
   function updateSelectedPhoto(updates: Partial<RidePhoto>) {
     if (!selectedPhoto) {
@@ -62,6 +133,67 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
         photo.id === selectedPhoto.id ? { ...photo, ...updates } : photo,
       ),
     );
+  }
+
+  function updateDays(daysValue: string) {
+    const dayCount = getPositiveDayCount(daysValue);
+    const normalizedDayCount = daysValue === "" ? null : dayCount ?? 1;
+    const normalizedDays = daysValue === "" ? "" : `${dayCount ?? 1}`;
+
+    setRideSettings((current) => ({
+      ...current,
+      days: normalizedDays,
+      endDate:
+        current.startDate && normalizedDayCount
+          ? getEndDateFromStartAndDays(current.startDate, normalizedDayCount)
+          : current.endDate,
+    }));
+  }
+
+  function updateStartDate(startDate: string) {
+    setRideSettings((current) => {
+      const dayCount = getPositiveDayCount(current.days);
+      let nextEndDate = current.endDate;
+
+      if (startDate && dayCount) {
+        nextEndDate = getEndDateFromStartAndDays(startDate, dayCount);
+      } else if (startDate && current.endDate && current.endDate < startDate) {
+        nextEndDate = startDate;
+      }
+
+      return {
+        ...current,
+        startDate,
+        endDate: nextEndDate,
+      };
+    });
+  }
+
+  function updateEndDate(endDate: string) {
+    setRideSettings((current) => {
+      if (!current.startDate) {
+        return {
+          ...current,
+          endDate,
+        };
+      }
+
+      if (!endDate) {
+        return {
+          ...current,
+          days: "",
+          endDate: "",
+        };
+      }
+
+      const nextEndDate = endDate < current.startDate ? current.startDate : endDate;
+
+      return {
+        ...current,
+        days: getInclusiveDayCount(current.startDate, nextEndDate),
+        endDate: nextEndDate,
+      };
+    });
   }
 
   return (
@@ -90,7 +222,7 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
         <header className="admin-topbar">
           <div>
             <p className="eyebrow">Editing ride</p>
-            <h1>{ride.title}</h1>
+            <h1>{rideSettings.title}</h1>
           </div>
           <div className="admin-actions">
             <a href={`/rides/${ride.slug}`} className="ghost-button">
@@ -290,6 +422,106 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                 </fieldset>
               </aside>
             ) : null}
+          </section>
+        ) : activeTab === "settings" ? (
+          <section className="ride-settings-editor">
+            <div className="ride-settings-panel">
+              <label>
+                Ride title
+                <input
+                  type="text"
+                  value={rideSettings.title}
+                  onChange={(event) =>
+                    setRideSettings((current) => ({
+                      ...current,
+                      title: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label>
+                Ride description
+                <textarea
+                  value={rideSettings.description}
+                  onChange={(event) =>
+                    setRideSettings((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                />
+              </label>
+
+              <div className="ride-settings-grid">
+                <label>
+                  Miles
+                  <input
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    value={rideSettings.miles}
+                    onChange={(event) =>
+                      setRideSettings((current) => ({
+                        ...current,
+                        miles: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+
+                <label>
+                  Days
+                  <input
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    value={rideSettings.days}
+                    onChange={(event) => updateDays(event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  Start date
+                  <input
+                    type="date"
+                    value={rideSettings.startDate}
+                    onChange={(event) => updateStartDate(event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  End date
+                  <input
+                    type="date"
+                    min={rideSettings.startDate || undefined}
+                    value={rideSettings.endDate}
+                    onChange={(event) => updateEndDate(event.target.value)}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <aside className="ride-settings-preview">
+              <p className="section-kicker">Ride metadata</p>
+              <h2>{rideSettings.title || "Untitled ride"}</h2>
+              <p>{rideSettings.description || "Ride description"}</p>
+              <div className="ride-settings-preview__stats">
+                <div>
+                  <span>Miles</span>
+                  <strong>{milesLabel}</strong>
+                </div>
+                <div>
+                  <span>Days</span>
+                  <strong>{daysLabel}</strong>
+                </div>
+                <div>
+                  <span>Date</span>
+                  <strong>{dateLabel}</strong>
+                </div>
+              </div>
+            </aside>
           </section>
         ) : (
           <section className="admin-placeholder">

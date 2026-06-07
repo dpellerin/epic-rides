@@ -33,6 +33,10 @@ export type Ride = {
   rideDate?: string;
   distance?: string;
   duration?: string;
+  miles?: number;
+  days?: number;
+  startDate?: string;
+  endDate?: string;
   bike?: string;
   tags: string[];
   coverPhotoId?: string;
@@ -42,6 +46,41 @@ export type Ride = {
   routeNotes?: string;
   photos: RidePhoto[];
 };
+
+export function formatRideDateLabel(dateValue: string) {
+  const [year, month, day] = dateValue.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+export function getRideDateLabel(ride: Pick<Ride, "startDate" | "endDate" | "rideDate">) {
+  if (!ride.startDate && !ride.endDate) {
+    return ride.rideDate ?? "Date";
+  }
+
+  if (ride.startDate && ride.endDate && ride.startDate !== ride.endDate) {
+    return `${formatRideDateLabel(ride.startDate)} to ${formatRideDateLabel(ride.endDate)}`;
+  }
+
+  return formatRideDateLabel(ride.startDate || ride.endDate || "");
+}
+
+export function getRideMilesLabel(ride: Pick<Ride, "miles" | "distance">) {
+  return ride.miles ? `${ride.miles} mi` : ride.distance ?? "Miles";
+}
+
+export function getRideDaysLabel(ride: Pick<Ride, "days" | "duration">) {
+  if (!ride.days) {
+    return ride.duration ?? "Days";
+  }
+
+  return `${ride.days} ${ride.days === 1 ? "day" : "days"}`;
+}
 
 export const rides: Ride[] = [
   {
@@ -72,6 +111,10 @@ The public page should make that rhythm visible. A route image gives visitors co
     rideDate: "Late summer",
     distance: "184 mi",
     duration: "1 long day",
+    miles: 184,
+    days: 1,
+    startDate: "2026-08-22",
+    endDate: "2026-08-22",
     bike: "Touring bike",
     tags: ["mountains", "forest", "lake", "golden hour"],
     coverPhotoId: "photo-hero",

@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import { PhotoStory } from "@/components/PhotoStory";
 import { RideHero } from "@/components/RideHero";
 import { RouteOverview } from "@/components/RouteOverview";
-import { rides } from "@/lib/rides";
+import { getRideDateLabel, getRideDaysLabel, getRideMilesLabel, rides } from "@/lib/rides";
 
 type RidePageProps = {
   params: Promise<{
@@ -25,6 +25,10 @@ export default async function RidePage({ params }: RidePageProps) {
     notFound();
   }
 
+  const milesLabel = getRideMilesLabel(ride);
+  const daysLabel = getRideDaysLabel(ride);
+  const dateLabel = getRideDateLabel(ride);
+
   return (
     <main className="public-shell">
       <RideHero ride={ride} />
@@ -37,16 +41,16 @@ export default async function RidePage({ params }: RidePageProps) {
         </div>
         <aside className="ride-stats" aria-label="Ride stats">
           <div>
-            <span>Distance</span>
-            <strong>{ride.distance}</strong>
+            <span>Miles</span>
+            <strong>{milesLabel}</strong>
           </div>
           <div>
-            <span>Duration</span>
-            <strong>{ride.duration}</strong>
+            <span>Days</span>
+            <strong>{daysLabel}</strong>
           </div>
           <div>
-            <span>Bike</span>
-            <strong>{ride.bike}</strong>
+            <span>Date</span>
+            <strong>{dateLabel}</strong>
           </div>
         </aside>
       </section>
