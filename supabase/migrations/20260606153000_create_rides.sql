@@ -13,7 +13,6 @@ create table public.rides (
   intro_title text not null default '',
   intro_text text not null default '',
   story text not null default '',
-  trip_notes text,
   region text,
   start_location text,
   end_location text,

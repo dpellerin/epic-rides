@@ -12,6 +12,9 @@ import {
   Settings,
   Upload,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
 import { useMemo, useState } from "react";
 import type {
   PhotoDisplaySize,
@@ -87,6 +90,11 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
     days: ride.days?.toString() ?? "",
     startDate: ride.startDate ?? "",
     endDate: ride.endDate ?? "",
+  });
+  const [rideStory, setRideStory] = useState({
+    introTitle: ride.introTitle,
+    introText: ride.introText,
+    story: ride.story,
   });
   const [photos, setPhotos] = useState<RidePhoto[]>(
     [...ride.photos].sort((a, b) => a.sortOrder - b.sortOrder),
@@ -258,7 +266,70 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
           ))}
         </div>
 
-        {activeTab === "photos" ? (
+        {activeTab === "story" ? (
+          <section className="story-editor">
+            <div className="story-editor-panel">
+              <label>
+                Intro title
+                <input
+                  type="text"
+                  value={rideStory.introTitle}
+                  onChange={(event) =>
+                    setRideStory((current) => ({
+                      ...current,
+                      introTitle: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label>
+                Intro text
+                <textarea
+                  value={rideStory.introText}
+                  onChange={(event) =>
+                    setRideStory((current) => ({
+                      ...current,
+                      introText: event.target.value,
+                    }))
+                  }
+                  rows={4}
+                />
+              </label>
+
+              <label>
+                Main story
+                <textarea
+                  value={rideStory.story}
+                  onChange={(event) =>
+                    setRideStory((current) => ({
+                      ...current,
+                      story: event.target.value,
+                    }))
+                  }
+                  rows={16}
+                />
+              </label>
+            </div>
+
+            <aside className="story-editor-preview">
+              <p className="section-kicker">Public story preview</p>
+              <div className="story-preview-block">
+                <span>The Ride</span>
+                <h2>{rideStory.introTitle || "Intro title"}</h2>
+                <p>{rideStory.introText || "Intro text"}</p>
+              </div>
+              <div className="story-preview-block story-preview-block--body">
+                <span>Road Notes</span>
+                <div className="markdown-body story-preview-markdown">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+                    {rideStory.story || "Main story"}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </aside>
+          </section>
+        ) : activeTab === "photos" ? (
           <section className="photo-editor">
             <div className="photo-editor__main">
               <div className="upload-panel">

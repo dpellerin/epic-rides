@@ -26,7 +26,6 @@ export type Ride = {
   introTitle: string;
   introText: string;
   story: string;
-  tripNotes?: string;
   region?: string;
   startLocation?: string;
   endLocation?: string;
@@ -103,8 +102,6 @@ The public page should make that rhythm visible. A route image gives visitors co
 - Photos can have their own narrative weight.
 - The admin editor can shape the public layout without becoming complicated.
 - Static route images are enough for an early version.`,
-    tripNotes:
-      "Good weather, dry roads, and plenty of scenic stops. The route image is a placeholder for the first non-interactive map approach.",
     region: "North Cascades",
     startLocation: "River Road",
     endLocation: "Valley Overlook",
