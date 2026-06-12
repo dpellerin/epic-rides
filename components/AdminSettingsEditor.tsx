@@ -9,7 +9,11 @@ import {
   getRideCoverPhoto,
   homepageSettings,
 } from "@/lib/homepage";
-import { rides } from "@/lib/rides";
+import type { Ride } from "@/lib/rides";
+
+type AdminSettingsEditorProps = {
+  rides: Ride[];
+};
 
 type PhotoOption = {
   id: string;
@@ -19,7 +23,7 @@ type PhotoOption = {
 
 const photosPerPage = 3;
 
-export function AdminSettingsEditor() {
+export function AdminSettingsEditor({ rides }: AdminSettingsEditorProps) {
   const publishedRides = rides.filter((ride) => ride.status === "published");
   const photoOptions = rides
     .map((ride) => {
@@ -58,8 +62,10 @@ export function AdminSettingsEditor() {
     heroPhotoId: settings.heroPhotoId,
   };
   const featuredRide = getHomepageFeaturedRide(publishedRides);
-  const heroPhoto = getHomepageHeroPhoto(selectedHomepageSettings, featuredRide);
-  const heroImageUrl = getPhotoImageUrl(heroPhoto, featuredRide);
+  const heroPhoto = featuredRide
+    ? getHomepageHeroPhoto(selectedHomepageSettings, featuredRide, publishedRides)
+    : undefined;
+  const heroImageUrl = featuredRide ? getPhotoImageUrl(heroPhoto, featuredRide) : "";
   const selectedPhoto = useMemo(
     () => photoOptions.find((photo) => photo.id === settings.heroPhotoId),
     [photoOptions, settings.heroPhotoId],
@@ -200,7 +206,7 @@ export function AdminSettingsEditor() {
           <aside className="admin-settings-preview">
             <p className="section-kicker">Homepage preview</p>
             <figure className="settings-hero-preview">
-              <img src={heroImageUrl} alt="" />
+              {heroImageUrl ? <img src={heroImageUrl} alt="" /> : null}
               <figcaption>
                 <span>{selectedPhoto?.rideTitle ?? "Selected image"}</span>
                 <strong>{settings.siteTitle || "Site title"}</strong>
@@ -210,8 +216,8 @@ export function AdminSettingsEditor() {
 
             <div className="settings-featured-preview">
               <span>Automatic: most recently added ride</span>
-              <h2>{featuredRide.title}</h2>
-              <p>{featuredRide.summary}</p>
+              <h2>{featuredRide?.title ?? "No published rides"}</h2>
+              <p>{featuredRide?.summary ?? "Publish a ride to populate the homepage."}</p>
             </div>
           </aside>
         </section>

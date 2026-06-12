@@ -1,6 +1,10 @@
 import { AdminRidesList } from "@/components/AdminRidesList";
-import { rides } from "@/lib/rides";
+import { getAdminRides } from "@/lib/rides-data";
 
-export default function AdminRidesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminRidesPage() {
+  const rides = await getAdminRides();
+
   return <AdminRidesList rides={rides} />;
 }

@@ -1,4 +1,4 @@
-import { rides, type Ride, type RidePhoto } from "@/lib/rides";
+import type { Ride, RidePhoto } from "@/lib/rides";
 
 export type HomepageSettings = {
   heroPhotoId?: string;
@@ -8,10 +8,6 @@ export const homepageSettings: HomepageSettings = {
   heroPhotoId: "00000000-0000-4000-8000-000000000301",
 };
 
-export function getPublishedRides() {
-  return rides.filter((ride) => ride.status === "published");
-}
-
 export function getMostRecentlyAddedRide(rideList: Ride[]) {
   return [...rideList].sort(
     (firstRide, secondRide) =>
@@ -19,15 +15,15 @@ export function getMostRecentlyAddedRide(rideList: Ride[]) {
   )[0];
 }
 
-export function getHomepageFeaturedRide(rideList = getPublishedRides()) {
+export function getHomepageFeaturedRide(rideList: Ride[]) {
   return getMostRecentlyAddedRide(rideList);
 }
 
-export function getAllRidePhotos(rideList = rides) {
+export function getAllRidePhotos(rideList: Ride[]) {
   return rideList.flatMap((ride) => ride.photos);
 }
 
-export function getRidePhotoById(photoId?: string, rideList = rides) {
+export function getRidePhotoById(photoId: string | undefined, rideList: Ride[]) {
   if (!photoId) {
     return undefined;
   }
@@ -39,8 +35,12 @@ export function getRideCoverPhoto(ride: Ride) {
   return ride.photos.find((photo) => photo.id === ride.coverPhotoId) ?? ride.photos[0];
 }
 
-export function getHomepageHeroPhoto(settings: HomepageSettings, featuredRide: Ride) {
-  return getRidePhotoById(settings.heroPhotoId) ?? getRideCoverPhoto(featuredRide);
+export function getHomepageHeroPhoto(
+  settings: HomepageSettings,
+  featuredRide: Ride,
+  rideList: Ride[],
+) {
+  return getRidePhotoById(settings.heroPhotoId, rideList) ?? getRideCoverPhoto(featuredRide);
 }
 
 export function getPhotoImageUrl(photo: RidePhoto | undefined, fallbackRide: Ride) {

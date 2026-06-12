@@ -16,11 +16,13 @@ import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type {
   PhotoDisplaySize,
   PhotoTextPlacement,
   Ride,
   RidePhoto,
+  RideStatus,
 } from "@/lib/rides";
 import { getRideDateLabel, getRideDaysLabel, getRideMilesLabel } from "@/lib/rides";
 
@@ -165,8 +167,18 @@ function getInclusiveDayCount(startDate: string, endDate: string) {
   return `${Math.max(1, dayCount)}`;
 }
 
+function getOptionalNumber(value: string) {
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : null;
+}
+
 export function AdminRideEditor({ ride }: AdminRideEditorProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("story");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [rideSettings, setRideSettings] = useState({
     title: ride.title,
     status: ride.status,
@@ -318,6 +330,70 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
     });
   }
 
+  async function saveRide(status: RideStatus) {
+    setIsSaving(true);
+    setSaveError("");
+    setSaveMessage("");
+
+    const nextRideSettings = {
+      ...rideSettings,
+      status,
+    };
+
+    const payload = {
+      title: nextRideSettings.title,
+      status,
+      summary: nextRideSettings.description,
+      introTitle: rideStory.introTitle,
+      introText: rideStory.introText,
+      story: rideStory.story,
+      region: nextRideSettings.region,
+      miles: getOptionalNumber(nextRideSettings.miles),
+      days: getOptionalNumber(nextRideSettings.days),
+      startDate: nextRideSettings.startDate,
+      endDate: nextRideSettings.endDate,
+      bike: nextRideSettings.bike,
+      tags: tagList,
+      coverPhotoId: nextRideSettings.coverPhotoId,
+      routeTitle: rideRoute.routeTitle,
+      routeNotes: rideRoute.routeNotes,
+      routeCaption: rideRoute.routeCaption,
+      routeImageUrl: rideRoute.routeImageUrl,
+      photos: photos.map((photo) => ({
+        id: photo.id,
+        caption: photo.caption ?? "",
+        storyText: photo.storyText ?? "",
+        altText: photo.altText ?? "",
+        displaySize: photo.displaySize,
+        textPlacement: photo.textPlacement,
+        sortOrder: photo.sortOrder,
+      })),
+    };
+
+    try {
+      const response = await fetch(`/api/admin/rides/${ride.slug}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not save ride.");
+      }
+
+      setRideSettings(nextRideSettings);
+      setSaveMessage(status === "published" ? "Published to Supabase." : "Saved to Supabase.");
+      router.refresh();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save ride.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <main className="admin-app">
       <header className="admin-sidebar">
@@ -348,6 +424,16 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
             </div>
           </div>
           <div className="admin-actions">
+            {saveMessage ? (
+              <span className="admin-save-status" role="status">
+                {saveMessage}
+              </span>
+            ) : null}
+            {saveError ? (
+              <span className="admin-save-status admin-save-status--error" role="alert">
+                {saveError}
+              </span>
+            ) : null}
             <a href={`/rides/${ride.slug}`} className="ghost-button">
               <Eye size={17} />
               Preview
@@ -355,27 +441,19 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
             <button
               type="button"
               className="ghost-button"
-              onClick={() =>
-                setRideSettings((current) => ({
-                  ...current,
-                  status: "draft",
-                }))
-              }
+              disabled={isSaving}
+              onClick={() => saveRide("draft")}
             >
               <Save size={17} />
-              Save draft
+              {isSaving ? "Saving" : "Save draft"}
             </button>
             <button
               type="button"
               className="primary-button"
-              onClick={() =>
-                setRideSettings((current) => ({
-                  ...current,
-                  status: "published",
-                }))
-              }
+              disabled={isSaving}
+              onClick={() => saveRide("published")}
             >
-              Publish
+              {isSaving ? "Saving" : "Publish"}
             </button>
           </div>
         </header>

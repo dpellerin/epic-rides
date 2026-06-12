@@ -1,5 +1,6 @@
 import { AdminRideEditor } from "@/components/AdminRideEditor";
-import { rides } from "@/lib/rides";
+import { getAdminRideBySlug } from "@/lib/rides-data";
+import { notFound } from "next/navigation";
 
 type AdminRideEditPageProps = {
   params: Promise<{
@@ -9,7 +10,11 @@ type AdminRideEditPageProps = {
 
 export default async function AdminRideEditPage({ params }: AdminRideEditPageProps) {
   const { id } = await params;
-  const ride = rides.find((item) => item.slug === id) ?? rides[0];
+  const ride = await getAdminRideBySlug(id);
+
+  if (!ride) {
+    notFound();
+  }
 
   return <AdminRideEditor ride={ride} />;
 }

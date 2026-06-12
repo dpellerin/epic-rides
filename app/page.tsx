@@ -5,10 +5,39 @@ import {
   getPhotoImageUrl,
   homepageSettings,
 } from "@/lib/homepage";
+import { getPublishedRides } from "@/lib/rides-data";
 
-export default function HomePage() {
-  const featuredRide = getHomepageFeaturedRide();
-  const heroPhoto = getHomepageHeroPhoto(homepageSettings, featuredRide);
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const publishedRides = await getPublishedRides();
+  const featuredRide = getHomepageFeaturedRide(publishedRides);
+
+  if (!featuredRide) {
+    return (
+      <main className="public-shell">
+        <section className="home-hero">
+          <div className="home-hero__shade" />
+          <nav className="public-nav public-nav--overlay" aria-label="Primary">
+            <Link href="/" className="brand-mark">
+              Epic Rides
+            </Link>
+            <div className="public-nav__links">
+              <Link href="/rides">Rides</Link>
+              <Link href="/admin/rides">Admin</Link>
+            </div>
+          </nav>
+          <div className="home-hero__content">
+            <p className="eyebrow">Motorcycle roads worth remembering</p>
+            <h1>Road stories from the miles that stay with you.</h1>
+            <p>Add a published ride in Supabase to feature it here.</p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const heroPhoto = getHomepageHeroPhoto(homepageSettings, featuredRide, publishedRides);
   const heroImageUrl = getPhotoImageUrl(heroPhoto, featuredRide);
 
   return (
