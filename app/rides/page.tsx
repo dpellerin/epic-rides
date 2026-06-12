@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { RideBrowser } from "@/components/RideBrowser";
-import { rides } from "@/lib/rides";
+import { getPublishedRides } from "@/lib/rides-data";
 
-export default function RidesPage() {
-  const publishedRides = rides.filter((ride) => ride.status === "published");
-  const featuredRide = publishedRides[0] ?? rides[0];
+export const revalidate = 60;
+
+export default async function RidesPage() {
+  const publishedRides = await getPublishedRides();
+  const featuredRide = publishedRides[0];
 
   return (
     <main className="public-shell">

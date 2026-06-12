@@ -5,7 +5,8 @@ import remarkGfm from "remark-gfm";
 import { PhotoStory } from "@/components/PhotoStory";
 import { RideHero } from "@/components/RideHero";
 import { RouteOverview } from "@/components/RouteOverview";
-import { getRideDateLabel, getRideDaysLabel, getRideMilesLabel, rides } from "@/lib/rides";
+import { getPublishedRideBySlug, getPublishedRideSlugs } from "@/lib/rides-data";
+import { getRideDateLabel, getRideDaysLabel, getRideMilesLabel } from "@/lib/rides";
 
 type RidePageProps = {
   params: Promise<{
@@ -13,13 +14,17 @@ type RidePageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return rides.map((ride) => ({ slug: ride.slug }));
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const slugs = await getPublishedRideSlugs();
+
+  return slugs.map((slug) => ({ slug }));
 }
 
 export default async function RidePage({ params }: RidePageProps) {
   const { slug } = await params;
-  const ride = rides.find((item) => item.slug === slug);
+  const ride = await getPublishedRideBySlug(slug);
 
   if (!ride) {
     notFound();
