@@ -14,9 +14,6 @@ create table public.rides (
   intro_text text not null default '',
   story text not null default '',
   region text,
-  ride_date text,
-  distance text,
-  duration text,
   miles integer,
   days integer,
   start_date date,
@@ -43,7 +40,6 @@ create table public.ride_photos (
   display_size photo_display_size not null default 'standard',
   text_placement photo_text_placement not null default 'caption',
   sort_order integer not null default 0,
-  is_featured boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

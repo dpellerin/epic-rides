@@ -67,32 +67,36 @@ export function PhotoStory({ photos }: PhotoStoryProps) {
 
       {storyPhotos.length > 0 ? (
         <div className="photo-story__grid">
-          {storyPhotos.map((photo) => (
-            <article
-              className={`photo-card photo-card--${photo.displaySize} photo-card--text-${photo.textPlacement}`}
-              key={photo.id}
-            >
-              <button
-                type="button"
-                className="photo-card__image"
-                onClick={() => openPhoto(photo.id)}
-                aria-label={`Open ${photo.caption ?? "ride photo"} full screen`}
-              >
-                <img src={photo.imageUrl} alt={photo.altText ?? ""} />
-                <span>
-                  <Maximize2 size={16} />
-                  View
-                </span>
-              </button>
+          {storyPhotos.map((photo) => {
+            const hasPhotoText = Boolean(photo.caption || photo.storyText);
 
-              {photo.textPlacement !== "none" ? (
-                <div className="photo-card__text">
-                  {photo.caption ? <h3>{photo.caption}</h3> : null}
-                  {photo.storyText ? <p>{photo.storyText}</p> : null}
-                </div>
-              ) : null}
-            </article>
-          ))}
+            return (
+              <article
+                className={`photo-card photo-card--${photo.displaySize} photo-card--text-${photo.textPlacement}`}
+                key={photo.id}
+              >
+                <button
+                  type="button"
+                  className="photo-card__image"
+                  onClick={() => openPhoto(photo.id)}
+                  aria-label={`Open ${photo.caption ?? "ride photo"} full screen`}
+                >
+                  <img src={photo.imageUrl} alt={photo.altText ?? ""} />
+                  <span>
+                    <Maximize2 size={16} />
+                    View
+                  </span>
+                </button>
+
+                {hasPhotoText ? (
+                  <div className="photo-card__text">
+                    {photo.caption ? <h3>{photo.caption}</h3> : null}
+                    {photo.storyText ? <p>{photo.storyText}</p> : null}
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
         </div>
       ) : null}
 

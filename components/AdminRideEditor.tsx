@@ -28,8 +28,92 @@ type AdminRideEditorProps = {
   ride: Ride;
 };
 
-const displaySizes: PhotoDisplaySize[] = ["standard", "wide", "hero", "feature"];
-const textPlacements: PhotoTextPlacement[] = ["caption", "side-note", "story-block", "none"];
+type PhotoStoryStyle = {
+  id: string;
+  label: string;
+  description: string;
+  displaySize: PhotoDisplaySize;
+  textPlacement: PhotoTextPlacement;
+  usesText: boolean;
+};
+
+const photoStoryStyles: PhotoStoryStyle[] = [
+  {
+    id: "album-mosaic",
+    label: "Album mosaic",
+    description: "Image-only photo in the album grid.",
+    displaySize: "standard",
+    textPlacement: "none",
+    usesText: false,
+  },
+  {
+    id: "hero-image",
+    label: "Full-width image only",
+    description: "Large story image with no caption or note.",
+    displaySize: "hero",
+    textPlacement: "caption",
+    usesText: false,
+  },
+  {
+    id: "inline-caption",
+    label: "Inline image with caption",
+    description: "Standard story image with short caption text.",
+    displaySize: "standard",
+    textPlacement: "caption",
+    usesText: true,
+  },
+  {
+    id: "wide-caption",
+    label: "Wide image with caption",
+    description: "Wide story image with short caption text.",
+    displaySize: "wide",
+    textPlacement: "caption",
+    usesText: true,
+  },
+  {
+    id: "feature-side-note",
+    label: "Feature image with side note",
+    description: "Prominent image paired with supporting note text.",
+    displaySize: "feature",
+    textPlacement: "side-note",
+    usesText: true,
+  },
+  {
+    id: "hero-side-note",
+    label: "Section hero with side note",
+    description: "Large anchor image paired with supporting note text.",
+    displaySize: "hero",
+    textPlacement: "side-note",
+    usesText: true,
+  },
+  {
+    id: "wide-story-block",
+    label: "Wide image with story block",
+    description: "Wide image followed by a more editorial text block.",
+    displaySize: "wide",
+    textPlacement: "story-block",
+    usesText: true,
+  },
+];
+
+function getPhotoStoryStyle(photo: RidePhoto) {
+  if (photo.textPlacement === "none") {
+    return photoStoryStyles[0];
+  }
+
+  if (!photo.caption && !photo.storyText && photo.displaySize === "hero") {
+    return photoStoryStyles[1];
+  }
+
+  return (
+    photoStoryStyles.find(
+      (style) =>
+        style.displaySize === photo.displaySize &&
+        style.textPlacement === photo.textPlacement &&
+        style.usesText,
+    ) ?? photoStoryStyles[2]
+  );
+}
 
 function parseDateInput(dateValue: string) {
   if (!dateValue) {
@@ -82,14 +166,19 @@ function getInclusiveDayCount(startDate: string, endDate: string) {
 }
 
 export function AdminRideEditor({ ride }: AdminRideEditorProps) {
-  const [activeTab, setActiveTab] = useState("photos");
+  const [activeTab, setActiveTab] = useState("story");
   const [rideSettings, setRideSettings] = useState({
     title: ride.title,
+    status: ride.status,
     description: ride.summary,
     miles: ride.miles?.toString() ?? "",
     days: ride.days?.toString() ?? "",
     startDate: ride.startDate ?? "",
     endDate: ride.endDate ?? "",
+    region: ride.region ?? "",
+    bike: ride.bike ?? "",
+    tags: ride.tags.join(", "),
+    coverPhotoId: ride.coverPhotoId ?? ride.photos[0]?.id ?? "",
   });
   const [rideStory, setRideStory] = useState({
     introTitle: ride.introTitle,
@@ -126,16 +215,21 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
   );
   const settingsPreviewRide = {
     miles: Number(rideSettings.miles) || undefined,
-    distance: undefined,
     days: Number(rideSettings.days) || undefined,
-    duration: undefined,
     startDate: rideSettings.startDate,
     endDate: rideSettings.endDate,
-    rideDate: undefined,
   };
   const milesLabel = getRideMilesLabel(settingsPreviewRide);
   const daysLabel = getRideDaysLabel(settingsPreviewRide);
   const dateLabel = getRideDateLabel(settingsPreviewRide);
+  const tagList = rideSettings.tags
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+  const coverPhoto =
+    photos.find((photo) => photo.id === rideSettings.coverPhotoId) ?? photos[0];
+  const selectedPhotoIsCover = selectedPhoto?.id === rideSettings.coverPhotoId;
+  const selectedPhotoStyle = selectedPhoto ? getPhotoStoryStyle(selectedPhoto) : undefined;
 
   function updateSelectedPhoto(updates: Partial<RidePhoto>) {
     if (!selectedPhoto) {
@@ -162,6 +256,20 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
           ? getEndDateFromStartAndDays(current.startDate, normalizedDayCount)
           : current.endDate,
     }));
+  }
+
+  function updateSelectedPhotoStyle(style: PhotoStoryStyle) {
+    const updates: Partial<RidePhoto> = {
+      displaySize: style.displaySize,
+      textPlacement: style.textPlacement,
+    };
+
+    if (!style.usesText) {
+      updates.caption = "";
+      updates.storyText = "";
+    }
+
+    updateSelectedPhoto(updates);
   }
 
   function updateStartDate(startDate: string) {
@@ -212,42 +320,61 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
 
   return (
     <main className="admin-app">
-      <aside className="admin-sidebar">
+      <header className="admin-sidebar">
         <a href="/" className="admin-brand">
           Epic Rides
         </a>
         <nav aria-label="Admin">
-          <a className="is-active" href="/admin/rides/cascade-loop/edit">
+          <a className="is-active" href="/admin/rides">
             <Route size={18} />
             Rides
           </a>
-          <a href="/admin">
-            <Images size={18} />
-            Media
-          </a>
-          <a href="/admin">
+          <a href="/admin/settings">
             <Settings size={18} />
             Settings
           </a>
         </nav>
-      </aside>
+      </header>
 
       <section className="admin-workspace">
         <header className="admin-topbar">
           <div>
             <p className="eyebrow">Editing ride</p>
-            <h1>{rideSettings.title}</h1>
+            <div className="admin-title-row">
+              <h1>{rideSettings.title}</h1>
+              <span className={`status-badge status-badge--${rideSettings.status}`}>
+                {rideSettings.status}
+              </span>
+            </div>
           </div>
           <div className="admin-actions">
             <a href={`/rides/${ride.slug}`} className="ghost-button">
               <Eye size={17} />
               Preview
             </a>
-            <button type="button" className="ghost-button">
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={() =>
+                setRideSettings((current) => ({
+                  ...current,
+                  status: "draft",
+                }))
+              }
+            >
               <Save size={17} />
               Save draft
             </button>
-            <button type="button" className="primary-button">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() =>
+                setRideSettings((current) => ({
+                  ...current,
+                  status: "published",
+                }))
+              }
+            >
               Publish
             </button>
           </div>
@@ -256,8 +383,8 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
         <div className="editor-tabs" role="tablist" aria-label="Ride editor sections">
           {[
             ["story", FileText, "Story"],
-            ["photos", Images, "Photos"],
             ["route", Map, "Route"],
+            ["photos", Images, "Photos"],
             ["settings", Settings, "Settings"],
           ].map(([id, Icon, label]) => (
             <button
@@ -342,7 +469,7 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                 <div>
                   <ImagePlus size={24} />
                   <strong>Drop ride photos here</strong>
-                  <span>Upload support will connect to Supabase Storage later.</span>
+                  <span>New uploads start in the album until they are placed in the story.</span>
                 </div>
                 <button type="button" className="ghost-button">
                   <Upload size={17} />
@@ -350,24 +477,10 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                 </button>
               </div>
 
-              <div className="admin-photo-grid">
-                {photos.map((photo) => (
-                  <button
-                    type="button"
-                    key={photo.id}
-                    className={photo.id === selectedPhoto?.id ? "is-selected" : ""}
-                    onClick={() => setSelectedPhotoId(photo.id)}
-                  >
-                    <img src={photo.imageUrl} alt="" />
-                    <span>{photo.displaySize}</span>
-                  </button>
-                ))}
-              </div>
-
               <div className="public-preview-strip">
                 <div className="preview-strip__header">
                   <PanelRight size={18} />
-                  Public layout preview
+                  Public layout
                 </div>
 
                 <div className="preview-summary">
@@ -380,6 +493,25 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                     <span>Album photos</span>
                   </div>
                 </div>
+
+                {coverPhoto ? (
+                  <div className="preview-block preview-block--cover">
+                    <div className="preview-block__label">
+                      <span>Cover photo</span>
+                      <small>Main ride image</small>
+                    </div>
+                    <button
+                      type="button"
+                      className={`preview-cover-photo ${
+                        coverPhoto.id === selectedPhoto?.id ? "is-selected" : ""
+                      }`}
+                      onClick={() => setSelectedPhotoId(coverPhoto.id)}
+                    >
+                      <img src={coverPhoto.imageUrl} alt="" />
+                      <span>Cover</span>
+                    </button>
+                  </div>
+                ) : null}
 
                 <div className="preview-block">
                   <div className="preview-block__label">
@@ -397,7 +529,12 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                         onClick={() => setSelectedPhotoId(photo.id)}
                       >
                         <img src={photo.imageUrl} alt="" />
-                        <span>{photo.displaySize}</span>
+                        <span className="preview-photo__layout">
+                          {getPhotoStoryStyle(photo).label}
+                        </span>
+                        {photo.id === rideSettings.coverPhotoId ? (
+                          <span className="preview-photo__cover">Cover</span>
+                        ) : null}
                       </button>
                     ))}
                   </div>
@@ -427,7 +564,9 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                 ) : null}
 
                 <div className="preview-note">
-                  <strong>{selectedPhoto?.textPlacement === "none" ? "Album" : "Story"}</strong>
+                  <strong>
+                    {selectedPhotoStyle?.label ?? "Selected photo"}
+                  </strong>
                   <span>
                     {selectedPhoto?.textPlacement === "none"
                       ? "This selected photo is image-only and appears in the mosaic."
@@ -440,63 +579,83 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
             {selectedPhoto ? (
               <aside className="photo-settings">
                 <p className="section-kicker">Selected photo</p>
-                <img src={selectedPhoto.imageUrl} alt="" />
+                <div className="photo-settings__image">
+                  <img src={selectedPhoto.imageUrl} alt="" />
+                  {selectedPhotoIsCover ? <span>Cover photo</span> : null}
+                </div>
+
+                <button
+                  type="button"
+                  className="ghost-button"
+                  disabled={selectedPhotoIsCover}
+                  onClick={() =>
+                    setRideSettings((current) => ({
+                      ...current,
+                      coverPhotoId: selectedPhoto.id,
+                    }))
+                  }
+                >
+                  {selectedPhotoIsCover ? "Current cover" : "Set as cover"}
+                </button>
 
                 <label>
-                  Caption
+                  Alt text
                   <textarea
-                    value={selectedPhoto.caption ?? ""}
+                    value={selectedPhoto.altText ?? ""}
                     onChange={(event) =>
-                      updateSelectedPhoto({ caption: event.target.value })
+                      updateSelectedPhoto({ altText: event.target.value })
                     }
                     rows={3}
                   />
                 </label>
 
-                <label>
-                  Story note
-                  <textarea
-                    value={selectedPhoto.storyText ?? ""}
-                    onChange={(event) =>
-                      updateSelectedPhoto({ storyText: event.target.value })
-                    }
-                    rows={5}
-                  />
-                </label>
-
                 <fieldset>
-                  <legend>Display</legend>
-                  <div className="segmented-control">
-                    {displaySizes.map((size) => (
+                  <legend>Story style</legend>
+                  <div className="photo-style-list">
+                    {photoStoryStyles.map((style) => (
                       <button
                         type="button"
-                        key={size}
-                        className={selectedPhoto.displaySize === size ? "is-active" : ""}
-                        onClick={() => updateSelectedPhoto({ displaySize: size })}
+                        key={style.id}
+                        className={selectedPhotoStyle?.id === style.id ? "is-active" : ""}
+                        onClick={() => updateSelectedPhotoStyle(style)}
                       >
-                        {size}
+                        <span>{style.label}</span>
+                        <small>{style.description}</small>
                       </button>
                     ))}
                   </div>
                 </fieldset>
 
-                <fieldset>
-                  <legend>Placement</legend>
-                  <div className="segmented-control segmented-control--stack">
-                    {textPlacements.map((placement) => (
-                      <button
-                        type="button"
-                        key={placement}
-                        className={
-                          selectedPhoto.textPlacement === placement ? "is-active" : ""
+                {selectedPhotoStyle?.usesText ? (
+                  <>
+                    <label>
+                      Caption
+                      <textarea
+                        value={selectedPhoto.caption ?? ""}
+                        onChange={(event) =>
+                          updateSelectedPhoto({ caption: event.target.value })
                         }
-                        onClick={() => updateSelectedPhoto({ textPlacement: placement })}
-                      >
-                        {placement}
-                      </button>
-                    ))}
+                        rows={3}
+                      />
+                    </label>
+
+                    <label>
+                      Story note
+                      <textarea
+                        value={selectedPhoto.storyText ?? ""}
+                        onChange={(event) =>
+                          updateSelectedPhoto({ storyText: event.target.value })
+                        }
+                        rows={5}
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <div className="photo-album-note">
+                    This style is image-only. Choose a caption, side-note, or story-block
+                    style to add text to this photo.
                   </div>
-                </fieldset>
+                )}
               </aside>
             ) : null}
           </section>
@@ -611,6 +770,34 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
 
               <div className="ride-settings-grid">
                 <label>
+                  Region
+                  <input
+                    type="text"
+                    value={rideSettings.region}
+                    onChange={(event) =>
+                      setRideSettings((current) => ({
+                        ...current,
+                        region: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+
+                <label>
+                  Bike
+                  <input
+                    type="text"
+                    value={rideSettings.bike}
+                    onChange={(event) =>
+                      setRideSettings((current) => ({
+                        ...current,
+                        bike: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+
+                <label>
                   Miles
                   <input
                     type="number"
@@ -656,6 +843,21 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                   />
                 </label>
               </div>
+
+              <label>
+                Tags
+                <input
+                  type="text"
+                  value={rideSettings.tags}
+                  onChange={(event) =>
+                    setRideSettings((current) => ({
+                      ...current,
+                      tags: event.target.value,
+                    }))
+                  }
+                  placeholder="mountains, forest, lake"
+                />
+              </label>
             </div>
 
             <aside className="ride-settings-preview">
@@ -663,6 +865,25 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
               <h2>{rideSettings.title || "Untitled ride"}</h2>
               <p>{rideSettings.description || "Ride description"}</p>
               <div className="ride-settings-preview__stats">
+                <div>
+                  <span>Status</span>
+                  <strong>{rideSettings.status}</strong>
+                </div>
+                <div>
+                  <span>Cover</span>
+                  <strong>
+                    {photos.find((photo) => photo.id === rideSettings.coverPhotoId)?.caption ??
+                      "Selected photo"}
+                  </strong>
+                </div>
+                <div>
+                  <span>Region</span>
+                  <strong>{rideSettings.region || "Region"}</strong>
+                </div>
+                <div>
+                  <span>Bike</span>
+                  <strong>{rideSettings.bike || "Bike"}</strong>
+                </div>
                 <div>
                   <span>Miles</span>
                   <strong>{milesLabel}</strong>
@@ -675,6 +896,13 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
                   <span>Date</span>
                   <strong>{dateLabel}</strong>
                 </div>
+              </div>
+              <div className="ride-settings-preview__tags">
+                {tagList.length > 0 ? (
+                  tagList.map((tag) => <span key={tag}>{tag}</span>)
+                ) : (
+                  <span>Tags</span>
+                )}
               </div>
             </aside>
           </section>

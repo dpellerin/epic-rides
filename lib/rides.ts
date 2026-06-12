@@ -14,7 +14,6 @@ export type RidePhoto = {
   displaySize: PhotoDisplaySize;
   textPlacement: PhotoTextPlacement;
   sortOrder: number;
-  isFeatured?: boolean;
 };
 
 export type Ride = {
@@ -22,14 +21,12 @@ export type Ride = {
   title: string;
   slug: string;
   status: RideStatus;
+  createdAt: string;
   summary: string;
   introTitle: string;
   introText: string;
   story: string;
   region?: string;
-  rideDate?: string;
-  distance?: string;
-  duration?: string;
   miles?: number;
   days?: number;
   startDate?: string;
@@ -56,9 +53,9 @@ export function formatRideDateLabel(dateValue: string) {
   }).format(date);
 }
 
-export function getRideDateLabel(ride: Pick<Ride, "startDate" | "endDate" | "rideDate">) {
+export function getRideDateLabel(ride: Pick<Ride, "startDate" | "endDate">) {
   if (!ride.startDate && !ride.endDate) {
-    return ride.rideDate ?? "Date";
+    return "Date";
   }
 
   if (ride.startDate && ride.endDate && ride.startDate !== ride.endDate) {
@@ -68,13 +65,13 @@ export function getRideDateLabel(ride: Pick<Ride, "startDate" | "endDate" | "rid
   return formatRideDateLabel(ride.startDate || ride.endDate || "");
 }
 
-export function getRideMilesLabel(ride: Pick<Ride, "miles" | "distance">) {
-  return ride.miles ? `${ride.miles} mi` : ride.distance ?? "Miles";
+export function getRideMilesLabel(ride: Pick<Ride, "miles">) {
+  return ride.miles ? `${ride.miles} mi` : "Miles";
 }
 
-export function getRideDaysLabel(ride: Pick<Ride, "days" | "duration">) {
+export function getRideDaysLabel(ride: Pick<Ride, "days">) {
   if (!ride.days) {
-    return ride.duration ?? "Days";
+    return "Days";
   }
 
   return `${ride.days} ${ride.days === 1 ? "day" : "days"}`;
@@ -82,10 +79,11 @@ export function getRideDaysLabel(ride: Pick<Ride, "days" | "duration">) {
 
 export const rides: Ride[] = [
   {
-    id: "ride-cascade-loop",
+    id: "00000000-0000-4000-8000-000000000001",
     title: "Cascade Loop",
     slug: "cascade-loop",
     status: "published",
+    createdAt: "2026-06-01T09:00:00.000Z",
     summary:
       "A long golden-hour loop through mountain passes, lake stops, forest roads, and the quiet pullouts that make a ride feel bigger than the map.",
     introTitle: "A route that changes its mood every thirty miles.",
@@ -102,16 +100,13 @@ The public page should make that rhythm visible. A route image gives visitors co
 - The admin editor can shape the public layout without becoming complicated.
 - Static route images are enough for an early version.`,
     region: "North Cascades",
-    rideDate: "Late summer",
-    distance: "184 mi",
-    duration: "1 long day",
     miles: 184,
     days: 1,
     startDate: "2026-08-22",
     endDate: "2026-08-22",
     bike: "Touring bike",
     tags: ["mountains", "forest", "lake", "golden hour"],
-    coverPhotoId: "photo-hero",
+    coverPhotoId: "00000000-0000-4000-8000-000000000101",
     coverImageUrl: "/rides/cascade-loop/hero.png",
     routeTitle: "A mountain loop with forest curves and lakeside pullouts.",
     routeImageUrl: "/rides/cascade-loop/route.png",
@@ -120,8 +115,8 @@ The public page should make that rhythm visible. A route image gives visitors co
       "For the MVP, this is an uploaded image rather than an interactive map. It keeps the public page polished while leaving GPX and drawing tools for later.",
     photos: [
       {
-        id: "photo-hero",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000101",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/hero.png",
         caption: "The overlook where the route starts to feel wide open.",
         storyText:
@@ -130,11 +125,10 @@ The public page should make that rhythm visible. A route image gives visitors co
         displaySize: "hero",
         textPlacement: "side-note",
         sortOrder: 1,
-        isFeatured: true,
       },
       {
-        id: "photo-lake",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000102",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/lake-stop.png",
         caption: "A quiet stop by the water before the road climbs again.",
         storyText:
@@ -145,8 +139,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 2,
       },
       {
-        id: "photo-forest",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000103",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/forest-road.png",
         caption: "Forest shade, clean pavement, and a curve that keeps pulling you in.",
         storyText:
@@ -157,8 +151,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 3,
       },
       {
-        id: "photo-album-01",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000104",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/hero.png",
         altText: "Wide mountain road pullout during a motorcycle ride.",
         displaySize: "wide",
@@ -166,8 +160,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 4,
       },
       {
-        id: "photo-album-02",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000105",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/lake-stop.png",
         altText: "Motorcycle stopped near a mountain lake.",
         displaySize: "standard",
@@ -175,8 +169,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 5,
       },
       {
-        id: "photo-album-03",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000106",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/forest-road.png",
         altText: "Forest road curve seen from the rider perspective.",
         displaySize: "feature",
@@ -184,8 +178,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 6,
       },
       {
-        id: "photo-album-04",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000107",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/lake-stop.png",
         altText: "Loaded motorcycle parked at a scenic stop.",
         displaySize: "standard",
@@ -193,8 +187,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 7,
       },
       {
-        id: "photo-album-05",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000108",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/hero.png",
         altText: "Open road and mountain overlook on the Cascade Loop.",
         displaySize: "hero",
@@ -202,8 +196,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 8,
       },
       {
-        id: "photo-album-06",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000109",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/forest-road.png",
         altText: "Sunlit pavement winding through trees.",
         displaySize: "standard",
@@ -211,8 +205,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 9,
       },
       {
-        id: "photo-album-07",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000110",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/lake-stop.png",
         altText: "Quiet lakeside break during a long ride.",
         displaySize: "wide",
@@ -220,8 +214,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 10,
       },
       {
-        id: "photo-album-08",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000111",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/hero.png",
         altText: "Motorcycle at a high overlook with a road beyond it.",
         displaySize: "standard",
@@ -229,8 +223,8 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 11,
       },
       {
-        id: "photo-album-09",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000112",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/forest-road.png",
         altText: "Tree-lined road section with filtered sunlight.",
         displaySize: "feature",
@@ -238,13 +232,141 @@ The public page should make that rhythm visible. A route image gives visitors co
         sortOrder: 12,
       },
       {
-        id: "photo-album-10",
-        rideId: "ride-cascade-loop",
+        id: "00000000-0000-4000-8000-000000000113",
+        rideId: "00000000-0000-4000-8000-000000000001",
         imageUrl: "/rides/cascade-loop/lake-stop.png",
         altText: "Motorcycle luggage and lake view during a route stop.",
         displaySize: "standard",
         textPlacement: "none",
         sortOrder: 13,
+      },
+    ],
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000002",
+    title: "Coastal Range Run",
+    slug: "coastal-range-run",
+    status: "published",
+    createdAt: "2026-06-07T09:00:00.000Z",
+    summary:
+      "A fast-changing coastal ride with foggy ridgelines, open sweepers, roadside espresso, and a final descent toward salt air.",
+    introTitle: "Fog, forest, and the road back to the water.",
+    introText:
+      "This sample ride gives the archive another kind of story: shorter, moodier, and more coastal than the Cascade Loop.",
+    story: `The route starts inland where the air is still warm, then climbs into a cooler band of trees and low cloud.
+
+By the time the road begins to fall toward the coast, the whole ride has changed character. The pavement gets faster, the light gets softer, and every stop feels like it belongs to a different hour of the day.`,
+    region: "Northern Coast Range",
+    miles: 126,
+    days: 1,
+    startDate: "2026-04-18",
+    endDate: "2026-04-18",
+    bike: "Sport tourer",
+    tags: ["coast", "forest", "fog", "sweepers"],
+    coverPhotoId: "00000000-0000-4000-8000-000000000201",
+    coverImageUrl: "/rides/cascade-loop/lake-stop.png",
+    routeTitle: "A ridge-to-coast route built around curves and changing weather.",
+    routeImageUrl: "/rides/cascade-loop/route.png",
+    routeCaption: "Static route concept for the Coastal Range Run.",
+    routeNotes:
+      "A compact day ride with enough contrast to make photo pacing feel important.",
+    photos: [
+      {
+        id: "00000000-0000-4000-8000-000000000201",
+        rideId: "00000000-0000-4000-8000-000000000002",
+        imageUrl: "/rides/cascade-loop/lake-stop.png",
+        caption: "The stop where the road starts smelling like the coast.",
+        storyText:
+          "The best part of this kind of ride is the temperature shift as the road crosses from inland valleys toward ocean air.",
+        altText: "Motorcycle parked beside water and pine trees.",
+        displaySize: "hero",
+        textPlacement: "side-note",
+        sortOrder: 1,
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000202",
+        rideId: "00000000-0000-4000-8000-000000000002",
+        imageUrl: "/rides/cascade-loop/forest-road.png",
+        caption: "A shaded stretch before the ridge opens up.",
+        storyText:
+          "Tighter corners and filtered light make this section feel slower than the mileage suggests.",
+        altText: "Winding forest road with sunlight through trees.",
+        displaySize: "feature",
+        textPlacement: "side-note",
+        sortOrder: 2,
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000203",
+        rideId: "00000000-0000-4000-8000-000000000002",
+        imageUrl: "/rides/cascade-loop/hero.png",
+        altText: "Motorcycle at an overlook during a coastal ride.",
+        displaySize: "wide",
+        textPlacement: "none",
+        sortOrder: 3,
+      },
+    ],
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000003",
+    title: "High Desert Overnighter",
+    slug: "high-desert-overnighter",
+    status: "published",
+    createdAt: "2026-06-10T09:00:00.000Z",
+    summary:
+      "Two days of long horizons, dry heat, lonely fuel stops, and a quiet overnight that makes the return leg feel earned.",
+    introTitle: "The kind of distance that changes how the road sounds.",
+    introText:
+      "This ride tests longer-duration browsing, desert tags, and the way multi-day trips show up in the public archive.",
+    story: `The first day is all space: straight sections, exposed hills, and enough distance between towns that every stop matters.
+
+The second morning is softer. The road is the same, but the ride feels different after a night away from home. That is the shape this story should capture.`,
+    region: "High Desert",
+    miles: 412,
+    days: 2,
+    startDate: "2026-09-12",
+    endDate: "2026-09-13",
+    bike: "Adventure bike",
+    tags: ["desert", "overnight", "solo", "open road"],
+    coverPhotoId: "00000000-0000-4000-8000-000000000301",
+    coverImageUrl: "/rides/cascade-loop/forest-road.png",
+    routeTitle: "A two-day out-and-back through open country and sparse services.",
+    routeImageUrl: "/rides/cascade-loop/route.png",
+    routeCaption: "Static route concept for the High Desert Overnighter.",
+    routeNotes:
+      "This is the ride that makes sorting by miles and days useful in the archive mockup.",
+    photos: [
+      {
+        id: "00000000-0000-4000-8000-000000000301",
+        rideId: "00000000-0000-4000-8000-000000000003",
+        imageUrl: "/rides/cascade-loop/forest-road.png",
+        caption: "A long section where the horizon keeps moving away.",
+        storyText:
+          "Multi-day rides need room for rhythm: first the push outward, then the quieter ride home.",
+        altText: "Rider perspective on a long road section.",
+        displaySize: "hero",
+        textPlacement: "side-note",
+        sortOrder: 1,
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000302",
+        rideId: "00000000-0000-4000-8000-000000000003",
+        imageUrl: "/rides/cascade-loop/hero.png",
+        caption: "The stop that turns a route into a trip.",
+        storyText:
+          "An overnight ride is partly about logistics, but the public page should still make it feel personal.",
+        altText: "Motorcycle at an open overlook with a distant road.",
+        displaySize: "feature",
+        textPlacement: "story-block",
+        sortOrder: 2,
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000303",
+        rideId: "00000000-0000-4000-8000-000000000003",
+        imageUrl: "/rides/cascade-loop/lake-stop.png",
+        altText: "Motorcycle stopped near water on a long route.",
+        displaySize: "standard",
+        textPlacement: "none",
+        sortOrder: 3,
       },
     ],
   },

@@ -25,7 +25,8 @@ export function RideHero({ ride }: RideHeroProps) {
         </Link>
         <div className="public-nav__links">
           <Link href="/">Home</Link>
-          <Link href="/admin/rides/cascade-loop/edit">Admin</Link>
+          <Link href="/rides">Rides</Link>
+          <Link href="/admin/rides">Admin</Link>
         </div>
       </nav>
       <div className="ride-hero__content">
