@@ -17,6 +17,7 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AdminSignOutButton } from "@/components/AdminSignOutButton";
 import type {
   PhotoDisplaySize,
   PhotoTextPlacement,
@@ -424,6 +425,7 @@ export function AdminRideEditor({ ride }: AdminRideEditorProps) {
             </div>
           </div>
           <div className="admin-actions">
+            <AdminSignOutButton />
             {saveMessage ? (
               <span className="admin-save-status" role="status">
                 {saveMessage}

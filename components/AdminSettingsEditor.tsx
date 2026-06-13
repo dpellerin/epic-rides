@@ -2,17 +2,19 @@
 
 import { Eye, Route, Settings } from "lucide-react";
 import { useMemo, useState } from "react";
+import { AdminSignOutButton } from "@/components/AdminSignOutButton";
 import {
   getHomepageFeaturedRide,
   getHomepageHeroPhoto,
   getPhotoImageUrl,
   getRideCoverPhoto,
-  homepageSettings,
 } from "@/lib/homepage";
 import type { Ride } from "@/lib/rides";
+import type { HomepageSettings } from "@/lib/settings-data";
 
 type AdminSettingsEditorProps = {
   rides: Ride[];
+  initialSettings: HomepageSettings;
 };
 
 type PhotoOption = {
@@ -23,7 +25,7 @@ type PhotoOption = {
 
 const photosPerPage = 3;
 
-export function AdminSettingsEditor({ rides }: AdminSettingsEditorProps) {
+export function AdminSettingsEditor({ rides, initialSettings }: AdminSettingsEditorProps) {
   const publishedRides = rides.filter((ride) => ride.status === "published");
   const photoOptions = rides
     .map((ride) => {
@@ -37,11 +39,14 @@ export function AdminSettingsEditor({ rides }: AdminSettingsEditorProps) {
     })
     .filter((photo) => Boolean(photo.imageUrl));
   const initialHeroPhotoId = photoOptions.some(
-    (photo) => photo.id === homepageSettings.heroPhotoId,
+    (photo) => photo.id === initialSettings.heroPhotoId,
   )
-    ? homepageSettings.heroPhotoId
+    ? initialSettings.heroPhotoId
     : photoOptions[0]?.id ?? "";
   const [photoPage, setPhotoPage] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
   const photoPageCount = Math.max(1, Math.ceil(photoOptions.length / photosPerPage));
   const visiblePhotoOptions = photoOptions.slice(
     photoPage * photosPerPage,
@@ -54,8 +59,8 @@ export function AdminSettingsEditor({ rides }: AdminSettingsEditorProps) {
     photoPage * photosPerPage + visiblePhotoOptions.length,
   );
   const [settings, setSettings] = useState({
-    siteTitle: "Epic Rides",
-    tagline: "Road stories from the miles that stay with you.",
+    siteTitle: initialSettings.siteTitle,
+    tagline: initialSettings.tagline,
     heroPhotoId: initialHeroPhotoId,
   });
   const selectedHomepageSettings = {
@@ -70,6 +75,33 @@ export function AdminSettingsEditor({ rides }: AdminSettingsEditorProps) {
     () => photoOptions.find((photo) => photo.id === settings.heroPhotoId),
     [photoOptions, settings.heroPhotoId],
   );
+
+  async function saveSettings() {
+    setIsSaving(true);
+    setSaveMessage("");
+    setSaveError("");
+
+    try {
+      const response = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not save settings.");
+      }
+
+      setSaveMessage("Saved to Supabase.");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Could not save settings.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <main className="admin-app">
@@ -96,10 +128,29 @@ export function AdminSettingsEditor({ rides }: AdminSettingsEditorProps) {
             <h1>Homepage controls</h1>
           </div>
           <div className="admin-actions">
+            <AdminSignOutButton />
+            {saveMessage ? (
+              <span className="admin-save-status" role="status">
+                {saveMessage}
+              </span>
+            ) : null}
+            {saveError ? (
+              <span className="admin-save-status admin-save-status--error" role="alert">
+                {saveError}
+              </span>
+            ) : null}
             <a href="/" className="ghost-button">
               <Eye size={17} />
               View homepage
             </a>
+            <button
+              type="button"
+              className="primary-button"
+              disabled={isSaving}
+              onClick={saveSettings}
+            >
+              {isSaving ? "Saving" : "Save settings"}
+            </button>
           </div>
         </header>
 

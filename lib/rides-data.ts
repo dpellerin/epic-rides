@@ -199,6 +199,15 @@ function mapRideRows(data: unknown[] | null) {
   return (data ?? []).map((ride) => mapRide(ride as RideRow));
 }
 
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
 export async function getPublishedRides() {
   const { data, error } = await getPublicSupabaseOrThrow()
     .from("rides")
@@ -266,6 +275,47 @@ export async function getAdminRideBySlug(slug: string) {
   }
 
   return data ? mapRide(data as RideRow) : undefined;
+}
+
+export async function createAdminRide(title = "Untitled ride") {
+  const supabase = getAdminSupabaseOrThrow();
+  const baseSlug = slugify(title) || "untitled-ride";
+  let slug = baseSlug;
+
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const { data, error } = await supabase
+      .from("rides")
+      .insert({
+        title,
+        slug,
+        status: "draft",
+        summary: "",
+        intro_title: "",
+        intro_text: "",
+        story: "",
+        tags: [],
+      })
+      .select("slug")
+      .single();
+
+    if (!error && data) {
+      const ride = await getAdminRideBySlug(data.slug);
+
+      if (!ride) {
+        throw new Error(`Ride '${data.slug}' was created but could not be reloaded.`);
+      }
+
+      return ride;
+    }
+
+    if (error?.code !== "23505") {
+      throw new Error(`Could not create ride: ${error?.message ?? "Unknown error"}`);
+    }
+
+    slug = `${baseSlug}-${attempt + 2}`;
+  }
+
+  throw new Error("Could not create a unique ride slug.");
 }
 
 export async function updateAdminRide(slug: string, payload: RideEditorPayload) {

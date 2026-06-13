@@ -362,3 +362,7 @@ where id = '00000000-0000-4000-8000-000000000002';
 update public.rides
 set cover_photo_id = '00000000-0000-4000-8000-000000000301'
 where id = '00000000-0000-4000-8000-000000000003';
+
+update public.site_settings
+set hero_photo_id = '00000000-0000-4000-8000-000000000301'
+where id = true;

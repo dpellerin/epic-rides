@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getRequestAdminUser } from "@/lib/auth";
 import { updateAdminRide, type RideEditorPayload } from "@/lib/rides-data";
 
 type AdminRideRouteProps = {
@@ -8,10 +9,12 @@ type AdminRideRouteProps = {
 };
 
 export async function PATCH(request: Request, { params }: AdminRideRouteProps) {
-  if (process.env.NODE_ENV !== "development") {
+  const user = await getRequestAdminUser(request);
+
+  if (!user) {
     return NextResponse.json(
-      { error: "Admin writes require Supabase Auth before production use." },
-      { status: 403 },
+      { error: "You must be signed in to update rides." },
+      { status: 401 },
     );
   }
 

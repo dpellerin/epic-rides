@@ -2,7 +2,9 @@
 
 import { CalendarDays, FilePenLine, MapPin, Plus, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { AdminSignOutButton } from "@/components/AdminSignOutButton";
 import {
   getRideDateLabel,
   getRideDaysLabel,
@@ -59,8 +61,11 @@ function sortRides(rides: Ride[], sortKey: AdminRideSort) {
 }
 
 export function AdminRidesList({ rides }: AdminRidesListProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<AdminRideSort>("updated");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
   const publishedCount = rides.filter((ride) => ride.status === "published").length;
   const draftCount = rides.filter((ride) => ride.status === "draft").length;
 
@@ -68,6 +73,33 @@ export function AdminRidesList({ rides }: AdminRidesListProps) {
     () => sortRides(rides.filter((ride) => rideMatchesQuery(ride, query)), sortKey),
     [query, rides, sortKey],
   );
+
+  async function createRide() {
+    setIsCreating(true);
+    setCreateError("");
+
+    try {
+      const response = await fetch("/api/admin/rides", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: "Untitled ride" }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not create ride.");
+      }
+
+      router.push(`/admin/rides/${result.ride.slug}/edit`);
+      router.refresh();
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : "Could not create ride.");
+    } finally {
+      setIsCreating(false);
+    }
+  }
 
   return (
     <main className="admin-app">
@@ -94,9 +126,20 @@ export function AdminRidesList({ rides }: AdminRidesListProps) {
             <h1>Rides</h1>
           </div>
           <div className="admin-actions">
-            <button type="button" className="primary-button">
+            <AdminSignOutButton />
+            {createError ? (
+              <span className="admin-save-status admin-save-status--error" role="alert">
+                {createError}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              className="primary-button"
+              disabled={isCreating}
+              onClick={createRide}
+            >
               <Plus size={17} />
-              New ride
+              {isCreating ? "Creating" : "New ride"}
             </button>
           </div>
         </header>
@@ -153,7 +196,13 @@ export function AdminRidesList({ rides }: AdminRidesListProps) {
             <div className="admin-rides-list">
               {visibleRides.map((ride) => (
                 <article className="admin-ride-row" key={ride.id}>
-                  <img src={ride.coverImageUrl} alt="" />
+                  {ride.coverImageUrl ? (
+                    <img src={ride.coverImageUrl} alt="" />
+                  ) : (
+                    <div className="admin-ride-row__image-placeholder" aria-hidden="true">
+                      Ride
+                    </div>
+                  )}
                   <div className="admin-ride-row__main">
                     <div className="admin-ride-row__title">
                       <h2>{ride.title}</h2>

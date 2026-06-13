@@ -1,12 +1,5 @@
 import type { Ride, RidePhoto } from "@/lib/rides";
-
-export type HomepageSettings = {
-  heroPhotoId?: string;
-};
-
-export const homepageSettings: HomepageSettings = {
-  heroPhotoId: "00000000-0000-4000-8000-000000000301",
-};
+import type { HomepageSettings } from "@/lib/settings-data";
 
 export function getMostRecentlyAddedRide(rideList: Ride[]) {
   return [...rideList].sort(
@@ -36,7 +29,7 @@ export function getRideCoverPhoto(ride: Ride) {
 }
 
 export function getHomepageHeroPhoto(
-  settings: HomepageSettings,
+  settings: Pick<HomepageSettings, "heroPhotoId">,
   featuredRide: Ride,
   rideList: Ride[],
 ) {
